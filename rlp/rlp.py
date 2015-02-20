@@ -56,7 +56,7 @@ def big_endian_to_int(string):
     '''convert a big endian binary string to integer'''
     # '' is a special case, treated same as 0
     s = string.encode('hex') or '0'
-    return long(s, 16)
+    return int(s, 16)
 
 idec = big_endian_to_int
 
@@ -183,14 +183,14 @@ def encode_length(L, offset):
 def encode(s):
     # if not s:
     #     return '\x80' if s == '' else '\xc0'
-    if isinstance(s, (str, unicode)):
+    if isinstance(s, str):
         s = str(s)
         if len(s) == 1 and ord(s) < 128:
             return s
         else:
             return encode_length(len(s), 128) + s
     elif isinstance(s, list):
-        return concat(map(encode, s))
+        return concat(list(map(encode, s)))
 
     raise TypeError("Encoding of %s not supported" % type(s))
 
