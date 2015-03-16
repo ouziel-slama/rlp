@@ -70,9 +70,9 @@ def __decode(s, pos=0):
     '''
     assert pos < len(s), "read beyond end of string in __decode"
 
-    fchar = ord(s[pos])
+    fchar = s[pos]
     if fchar < 128:
-        return (s[pos], pos + 1)
+        return (int_to_big_endian(s[pos]), pos + 1)
     elif fchar < 184:
         b = fchar - 128
         return (s[pos + 1:pos + 1 + b], pos + 1 + b)
@@ -105,7 +105,7 @@ def __decode(s, pos=0):
 
 
 def decode(s):
-    assert isinstance(s, str)
+    assert isinstance(s, (str, bytes))
     if s:
         return __decode(s)[0]
 
@@ -246,17 +246,19 @@ def big_endian_to_int(string):
     return int(s, 16)
 
 
-def encode(input):
-    if isinstance(input,bytes):
-        if len(input) == 1 and ord(input) < 128: return input
-        else: return encode_length(len(input),128) + input
-    elif isinstance(input,list):
+def encode(value):
+    if isinstance(value, str):
+        value = bytes(value, 'utf-8')
+    if isinstance(value, bytes):
+        if len(value) == 1 and ord(value) < 128: return value
+        else: return encode_length(len(value),128) + value
+    elif isinstance(value,list):
         output = b''
-        for item in input:
+        for item in value:
             output += encode(item)
         return encode_length(len(output),192) + output
 
-    raise TypeError("Encoding of %s not supported" % type(input))
+    raise TypeError("Encoding of %s not supported" % type(value))
 
 def encode_length(L,offset):
     if L < 56:
